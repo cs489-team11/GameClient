@@ -1,0 +1,13 @@
+.card {
+    height: 8rem;
+    margin-top: 20px;
+    background-color: aqua;
+}
+
+h1 {
+    color: white;
+}
+.defaultCard {
+    height: 15vh;
+    border-radius: 8px
+}
