@@ -1,5 +1,6 @@
 import React from "react";
 import { useHistory } from "react-router";
+import { join, start } from "../serverMethods";
 
 function SignIn({ logFunc }) {
   const [nickname, setNickname] = React.useState("");
@@ -23,6 +24,7 @@ function SignIn({ logFunc }) {
             className="sign-in-button"
             onClick={() => {
               logFunc(nickname);
+              join(nickname);
               history.push("/");
             }}
           >
