@@ -868,7 +868,7 @@ proto.server.JoinRequest.prototype.setUsername = function(value) {
  * @private {!Array<number>}
  * @const
  */
-proto.server.JoinResponse.repeatedFields_ = [10];
+proto.server.JoinResponse.repeatedFields_ = [3];
 
 
 
@@ -903,15 +903,17 @@ proto.server.JoinResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     userId: jspb.Message.getFieldWithDefault(msg, 1, ""),
     gameId: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    duration: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    playerPoints: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    bankPointsPerPlayer: jspb.Message.getFieldWithDefault(msg, 5, 0),
-    creditInterest: jspb.Message.getFieldWithDefault(msg, 6, 0),
-    depositInterest: jspb.Message.getFieldWithDefault(msg, 7, 0),
-    creditTime: jspb.Message.getFieldWithDefault(msg, 8, 0),
-    depositTime: jspb.Message.getFieldWithDefault(msg, 9, 0),
     playersList: jspb.Message.toObjectList(msg.getPlayersList(),
-    proto.server.Player.toObject, includeInstance)
+    proto.server.Player.toObject, includeInstance),
+    duration: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    playerPoints: jspb.Message.getFieldWithDefault(msg, 5, 0),
+    bankPointsPerPlayer: jspb.Message.getFieldWithDefault(msg, 6, 0),
+    creditInterest: jspb.Message.getFieldWithDefault(msg, 7, 0),
+    depositInterest: jspb.Message.getFieldWithDefault(msg, 8, 0),
+    creditTime: jspb.Message.getFieldWithDefault(msg, 9, 0),
+    depositTime: jspb.Message.getFieldWithDefault(msg, 10, 0),
+    theftTime: jspb.Message.getFieldWithDefault(msg, 11, 0),
+    theftPercentage: jspb.Message.getFieldWithDefault(msg, 12, 0)
   };
 
   if (includeInstance) {
@@ -957,37 +959,45 @@ proto.server.JoinResponse.deserializeBinaryFromReader = function(msg, reader) {
       msg.setGameId(value);
       break;
     case 3:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setDuration(value);
-      break;
-    case 4:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setPlayerPoints(value);
-      break;
-    case 5:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setBankPointsPerPlayer(value);
-      break;
-    case 6:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setCreditInterest(value);
-      break;
-    case 7:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setDepositInterest(value);
-      break;
-    case 8:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setCreditTime(value);
-      break;
-    case 9:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setDepositTime(value);
-      break;
-    case 10:
       var value = new proto.server.Player;
       reader.readMessage(value,proto.server.Player.deserializeBinaryFromReader);
       msg.addPlayers(value);
+      break;
+    case 4:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setDuration(value);
+      break;
+    case 5:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setPlayerPoints(value);
+      break;
+    case 6:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setBankPointsPerPlayer(value);
+      break;
+    case 7:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setCreditInterest(value);
+      break;
+    case 8:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setDepositInterest(value);
+      break;
+    case 9:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setCreditTime(value);
+      break;
+    case 10:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setDepositTime(value);
+      break;
+    case 11:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setTheftTime(value);
+      break;
+    case 12:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setTheftPercentage(value);
       break;
     default:
       reader.skipField();
@@ -1032,61 +1042,75 @@ proto.server.JoinResponse.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getDuration();
-  if (f !== 0) {
-    writer.writeInt32(
+  f = message.getPlayersList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
       3,
-      f
+      f,
+      proto.server.Player.serializeBinaryToWriter
     );
   }
-  f = message.getPlayerPoints();
+  f = message.getDuration();
   if (f !== 0) {
     writer.writeInt32(
       4,
       f
     );
   }
-  f = message.getBankPointsPerPlayer();
+  f = message.getPlayerPoints();
   if (f !== 0) {
     writer.writeInt32(
       5,
       f
     );
   }
-  f = message.getCreditInterest();
+  f = message.getBankPointsPerPlayer();
   if (f !== 0) {
     writer.writeInt32(
       6,
       f
     );
   }
-  f = message.getDepositInterest();
+  f = message.getCreditInterest();
   if (f !== 0) {
     writer.writeInt32(
       7,
       f
     );
   }
-  f = message.getCreditTime();
+  f = message.getDepositInterest();
   if (f !== 0) {
     writer.writeInt32(
       8,
       f
     );
   }
-  f = message.getDepositTime();
+  f = message.getCreditTime();
   if (f !== 0) {
     writer.writeInt32(
       9,
       f
     );
   }
-  f = message.getPlayersList();
-  if (f.length > 0) {
-    writer.writeRepeatedMessage(
+  f = message.getDepositTime();
+  if (f !== 0) {
+    writer.writeInt32(
       10,
-      f,
-      proto.server.Player.serializeBinaryToWriter
+      f
+    );
+  }
+  f = message.getTheftTime();
+  if (f !== 0) {
+    writer.writeInt32(
+      11,
+      f
+    );
+  }
+  f = message.getTheftPercentage();
+  if (f !== 0) {
+    writer.writeInt32(
+      12,
+      f
     );
   }
 };
@@ -1129,138 +1153,12 @@ proto.server.JoinResponse.prototype.setGameId = function(value) {
 
 
 /**
- * optional int32 duration = 3;
- * @return {number}
- */
-proto.server.JoinResponse.prototype.getDuration = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.server.JoinResponse} returns this
- */
-proto.server.JoinResponse.prototype.setDuration = function(value) {
-  return jspb.Message.setProto3IntField(this, 3, value);
-};
-
-
-/**
- * optional int32 player_points = 4;
- * @return {number}
- */
-proto.server.JoinResponse.prototype.getPlayerPoints = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.server.JoinResponse} returns this
- */
-proto.server.JoinResponse.prototype.setPlayerPoints = function(value) {
-  return jspb.Message.setProto3IntField(this, 4, value);
-};
-
-
-/**
- * optional int32 bank_points_per_player = 5;
- * @return {number}
- */
-proto.server.JoinResponse.prototype.getBankPointsPerPlayer = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.server.JoinResponse} returns this
- */
-proto.server.JoinResponse.prototype.setBankPointsPerPlayer = function(value) {
-  return jspb.Message.setProto3IntField(this, 5, value);
-};
-
-
-/**
- * optional int32 credit_interest = 6;
- * @return {number}
- */
-proto.server.JoinResponse.prototype.getCreditInterest = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.server.JoinResponse} returns this
- */
-proto.server.JoinResponse.prototype.setCreditInterest = function(value) {
-  return jspb.Message.setProto3IntField(this, 6, value);
-};
-
-
-/**
- * optional int32 deposit_interest = 7;
- * @return {number}
- */
-proto.server.JoinResponse.prototype.getDepositInterest = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 7, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.server.JoinResponse} returns this
- */
-proto.server.JoinResponse.prototype.setDepositInterest = function(value) {
-  return jspb.Message.setProto3IntField(this, 7, value);
-};
-
-
-/**
- * optional int32 credit_time = 8;
- * @return {number}
- */
-proto.server.JoinResponse.prototype.getCreditTime = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.server.JoinResponse} returns this
- */
-proto.server.JoinResponse.prototype.setCreditTime = function(value) {
-  return jspb.Message.setProto3IntField(this, 8, value);
-};
-
-
-/**
- * optional int32 deposit_time = 9;
- * @return {number}
- */
-proto.server.JoinResponse.prototype.getDepositTime = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 9, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.server.JoinResponse} returns this
- */
-proto.server.JoinResponse.prototype.setDepositTime = function(value) {
-  return jspb.Message.setProto3IntField(this, 9, value);
-};
-
-
-/**
- * repeated Player players = 10;
+ * repeated Player players = 3;
  * @return {!Array<!proto.server.Player>}
  */
 proto.server.JoinResponse.prototype.getPlayersList = function() {
   return /** @type{!Array<!proto.server.Player>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.server.Player, 10));
+    jspb.Message.getRepeatedWrapperField(this, proto.server.Player, 3));
 };
 
 
@@ -1269,7 +1167,7 @@ proto.server.JoinResponse.prototype.getPlayersList = function() {
  * @return {!proto.server.JoinResponse} returns this
 */
 proto.server.JoinResponse.prototype.setPlayersList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 10, value);
+  return jspb.Message.setRepeatedWrapperField(this, 3, value);
 };
 
 
@@ -1279,7 +1177,7 @@ proto.server.JoinResponse.prototype.setPlayersList = function(value) {
  * @return {!proto.server.Player}
  */
 proto.server.JoinResponse.prototype.addPlayers = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 10, opt_value, proto.server.Player, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 3, opt_value, proto.server.Player, opt_index);
 };
 
 
@@ -1289,6 +1187,168 @@ proto.server.JoinResponse.prototype.addPlayers = function(opt_value, opt_index) 
  */
 proto.server.JoinResponse.prototype.clearPlayersList = function() {
   return this.setPlayersList([]);
+};
+
+
+/**
+ * optional int32 duration = 4;
+ * @return {number}
+ */
+proto.server.JoinResponse.prototype.getDuration = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.server.JoinResponse} returns this
+ */
+proto.server.JoinResponse.prototype.setDuration = function(value) {
+  return jspb.Message.setProto3IntField(this, 4, value);
+};
+
+
+/**
+ * optional int32 player_points = 5;
+ * @return {number}
+ */
+proto.server.JoinResponse.prototype.getPlayerPoints = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.server.JoinResponse} returns this
+ */
+proto.server.JoinResponse.prototype.setPlayerPoints = function(value) {
+  return jspb.Message.setProto3IntField(this, 5, value);
+};
+
+
+/**
+ * optional int32 bank_points_per_player = 6;
+ * @return {number}
+ */
+proto.server.JoinResponse.prototype.getBankPointsPerPlayer = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.server.JoinResponse} returns this
+ */
+proto.server.JoinResponse.prototype.setBankPointsPerPlayer = function(value) {
+  return jspb.Message.setProto3IntField(this, 6, value);
+};
+
+
+/**
+ * optional int32 credit_interest = 7;
+ * @return {number}
+ */
+proto.server.JoinResponse.prototype.getCreditInterest = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 7, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.server.JoinResponse} returns this
+ */
+proto.server.JoinResponse.prototype.setCreditInterest = function(value) {
+  return jspb.Message.setProto3IntField(this, 7, value);
+};
+
+
+/**
+ * optional int32 deposit_interest = 8;
+ * @return {number}
+ */
+proto.server.JoinResponse.prototype.getDepositInterest = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.server.JoinResponse} returns this
+ */
+proto.server.JoinResponse.prototype.setDepositInterest = function(value) {
+  return jspb.Message.setProto3IntField(this, 8, value);
+};
+
+
+/**
+ * optional int32 credit_time = 9;
+ * @return {number}
+ */
+proto.server.JoinResponse.prototype.getCreditTime = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 9, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.server.JoinResponse} returns this
+ */
+proto.server.JoinResponse.prototype.setCreditTime = function(value) {
+  return jspb.Message.setProto3IntField(this, 9, value);
+};
+
+
+/**
+ * optional int32 deposit_time = 10;
+ * @return {number}
+ */
+proto.server.JoinResponse.prototype.getDepositTime = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 10, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.server.JoinResponse} returns this
+ */
+proto.server.JoinResponse.prototype.setDepositTime = function(value) {
+  return jspb.Message.setProto3IntField(this, 10, value);
+};
+
+
+/**
+ * optional int32 theft_time = 11;
+ * @return {number}
+ */
+proto.server.JoinResponse.prototype.getTheftTime = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 11, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.server.JoinResponse} returns this
+ */
+proto.server.JoinResponse.prototype.setTheftTime = function(value) {
+  return jspb.Message.setProto3IntField(this, 11, value);
+};
+
+
+/**
+ * optional int32 theft_percentage = 12;
+ * @return {number}
+ */
+proto.server.JoinResponse.prototype.getTheftPercentage = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 12, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.server.JoinResponse} returns this
+ */
+proto.server.JoinResponse.prototype.setTheftPercentage = function(value) {
+  return jspb.Message.setProto3IntField(this, 12, value);
 };
 
 
