@@ -6,7 +6,19 @@ import SimpleCard from "../components/SimpleCard";
 import Timer from "../components/Timer";
 import RiddleCard from "../components/RiddleCard";
 import Lottery from "../components/Lottery";
-import { credit, deposit, leave, startStream } from "../serverMethods";
+const {
+  GameClient,
+  StartRequest,
+  DepositRequest,
+  LeaveRequest,
+  JoinRequest,
+  CreditRequest,
+  StreamRequest,
+} = require("../proto/game_grpc_web_pb");
+
+const client = new GameClient("http://178.128.85.78:8080", null, null);
+
+
 // TODO: use credit and deposit as part of onclick method for buttons, passing the value in the forms
 
 class Home extends React.Component {
@@ -62,11 +74,67 @@ class Home extends React.Component {
         { location: 9, prize: 25 },
       ],
     };
-    this.stream = startStream();
   }
   componentDidMount() {
-    this.stream.on("data", (response) => {
-      this.setState(response.getMessage()); // TODO: parse the message if needed and map everything to logboard, scoreboard accordingly
+    // If user hit start => join game, start stream, start the game
+    var request = new JoinRequest();
+    request.setUsername(window.nickname);
+    client.join(request, {}, (error, response) => {
+      if (error) {
+        console.log(
+          `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
+        );
+      } else {
+        this.userId = response.array[0];
+        this.gameId = response.array[1];
+        console.log("Joined game");
+
+        // Start stream
+        var stream = new StreamRequest();
+        stream.setGameId(this.gameId);
+        stream.setUserId(this.userId)
+        this.game = client.stream(stream, {});
+        this.game.on('data', data => {
+          console.log(data.getMessage())
+          this.setState(data.getMessage())
+        })
+        this.game.on('status', status => {
+          console.log(status.details);
+        })
+        // If user hit start => start game, if join => do nothing
+        if (window.started){ 
+          var request = new StartRequest();
+          window.req = request
+          request.setGameId(this.gameId);
+          client.start(request, {}, (error, response) => {
+            if (error) {
+              console.log(
+                `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
+              );
+            } else {
+              console.log("Started game");
+              this.depositHandler(100)
+            }
+          })
+        }
+      }
+    });
+  }
+
+  depositHandler = amount => {
+    if (!this.gameId) return alert("The game has not started yet")
+    var request = new DepositRequest();
+    request.setGameId(this.gameId);
+    request.setUserId(this.userId);
+    request.setValue(amount);
+    client.deposit(request, {}, (error, response) => {
+      if (error) {
+        console.log(
+          `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
+        );
+      } else {
+        console.log(response);
+      }
     });
   }
 
