@@ -14,7 +14,7 @@ function CardWithInput({ title, description, value, clickEvent }) {
         <input
           type="text"
           className="card-input"
-          placeholder="enter the nickname"
+          placeholder="enter the amount"
           value={data}
           onChange={(event) => setData(event.target.value)}
         />
