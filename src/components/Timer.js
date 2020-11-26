@@ -6,6 +6,7 @@ const Completionist = () => (
   <span>Game is finished. Click for explanation.</span>
 );
 
+
 const Timer = ({ time }) => {
   const renderer = ({ minutes, seconds, completed }) => {
     if (completed) {

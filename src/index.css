@@ -320,3 +320,7 @@ body {
 #grid > div:active {
   background-color: #1cf326;
 }
+
+.me {
+  background-color: #ffca0a;
+}

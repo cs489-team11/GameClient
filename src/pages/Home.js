@@ -26,34 +26,10 @@ class Home extends React.Component {
     super(props);
     this.state = {
       playerList: [
-        { nickName: "Player1", score: 453 },
-        { nickName: "Player2", score: 53 },
-        { nickName: "Player3", score: 231 },
-        { nickName: "Player4", score: 111 },
-        { nickName: "Player5", score: 433 },
-        { nickName: "Player6", score: 453 },
-        { nickName: "Player7", score: 53 },
-        { nickName: "Player8", score: 231 },
-        { nickName: "Player9", score: 111 },
-        { nickName: "Player10", score: 433 },
-        { nickName: "Player11", score: 433 },
-        { nickName: "Player12", score: 433 },
       ],
       logList: [
-        { event: "Player1 took $20 credit" },
-        { event: "Player2 deposited $14" },
-        { event: "Player3 deposited $17" },
-        { event: "Player4 received $20 from deposit" },
-        { event: "Player5 has status of$ 0" },
-        { event: "Player6 won$ 5 from slot machine" },
-        { event: "Player7 deposited$ 3" },
-        { event: "Player8 took 1$20 credit " },
-        { event: "Player9 took$ 5 credit" },
-        { event: "Player10 deposited 5$00" },
-        { event: "Bank robbery with 45$00 loss has ocurred" },
-        { event: "Player2 deposited$ 4" },
       ],
-
+      time:0,
       riddle: {
         question: "Which is the first Pokemon?",
         variantA: "Bulbasaur",
@@ -61,7 +37,7 @@ class Home extends React.Component {
         variantC: "Rhydon",
         variantD: "Arceus",
       },
-
+      points:0,
       prizeList: [
         { location: 1, prize: 45 },
         { location: 2, prize: 65 },
@@ -88,6 +64,7 @@ class Home extends React.Component {
         this.userId = response.array[0];
         this.gameId = response.array[1];
         console.log("Joined game");
+        this.parseJoin(response.array)
 
         // Start stream
         var stream = new StreamRequest();
@@ -121,6 +98,15 @@ class Home extends React.Component {
     });
   }
 
+  parseJoin = response => {
+    const playerList = [];
+    response[2].forEach(player => {
+      playerList.push({me: player[0] == this.userId, nickName: player[1], score: player[2]})
+    })
+    playerList.pop(playerList.length)
+    this.setState({...this.state, playerList, time: response[3], points: response[4]})
+  }
+
   depositHandler = amount => {
     if (!this.gameId) return alert("The game has not started yet")
     var request = new DepositRequest();
@@ -149,9 +135,9 @@ class Home extends React.Component {
                 <SimpleCard
                   title="Time Left"
                   description=""
-                  value={<Timer time={100000} />}
+                  value={<Timer time={this.state.time*1000} />}
                 />
-                <SimpleCard title="Total Points" description="" value={555} />
+                <SimpleCard title="Total Points" description="" value={this.state.points} />
               </div>
               <div className="second-line-cards">
                 <CardWithInput title="Credit" description="Request amount" />
@@ -175,7 +161,7 @@ class Home extends React.Component {
                 <h2 className="heading-secondary">SCOREBOARD</h2>
                 <div className="wrapper">
                   {this.state.playerList.map((player, index) => {
-                    return <ScoreBoard player={player} />;
+                    return <ScoreBoard key={index} player={player} />;
                   })}
                 </div>
               </div>
@@ -183,7 +169,7 @@ class Home extends React.Component {
                 <h2 className="heading-secondary">LOGBOARD</h2>
                 <div className="wrapper">
                   {this.state.logList.map((event, index) => {
-                    return <LogBoard event={event} />;
+                    return <LogBoard key={index} event={event} />;
                   })}
                 </div>
               </div>
