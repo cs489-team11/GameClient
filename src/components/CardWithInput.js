@@ -1,6 +1,8 @@
 import React from "react";
 
-function CardWithInput({ title, description, value }) {
+function CardWithInput({ title, description, value, clickEvent }) {
+  const [data, setData] = React.useState("");
+  
   return (
     <div className="simple-card">
       <h2 className="heading-secondary">{title}</h2>
@@ -12,9 +14,11 @@ function CardWithInput({ title, description, value }) {
         <input
           type="text"
           className="card-input"
-          placeholder="enter the amount"
+          placeholder="enter the nickname"
+          value={data}
+          onChange={(event) => setData(event.target.value)}
         />
-        <button className="video-game-btn">ENTER</button>
+        <button className="video-game-btn" onClick={() => clickEvent(data)}>ENTER</button>
       </div>
     </div>
   );

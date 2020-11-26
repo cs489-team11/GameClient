@@ -27,7 +27,7 @@ class Home extends React.Component {
     this.state = {
       playerList: [
       ],
-      logList: [
+      logList: [ 
       ],
       time:0,
       riddle: {
@@ -38,21 +38,9 @@ class Home extends React.Component {
         variantD: "Arceus",
       },
       points:0,
-      prizeList: [
-        { location: 1, prize: 45 },
-        { location: 2, prize: 65 },
-        { location: 3, prize: 1 },
-        { location: 4, prize: 57 },
-        { location: 5, prize: 0 },
-        { location: 6, prize: 100 },
-        { location: 7, prize: 15 },
-        { location: 8, prize: 10 },
-        { location: 9, prize: 25 },
-      ],
+      prizeList: [],
     };
-  }
-  componentDidMount() {
-    // If user hit start => join game, start stream, start the game
+
     var request = new JoinRequest();
     request.setUsername(window.nickname);
     client.join(request, {}, (error, response) => {
@@ -61,8 +49,8 @@ class Home extends React.Component {
           `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
         );
       } else {
-        this.userId = response.array[0];
-        this.gameId = response.array[1];
+        this.userId = /** @type {string} */ response.array[0];
+        this.gameId = /** @type {string} */ response.array[1];
         console.log("Joined game");
         this.parseJoin(response.array)
 
@@ -72,11 +60,9 @@ class Home extends React.Component {
         stream.setUserId(this.userId)
         this.game = client.stream(stream, {});
         this.game.on('data', data => {
-          console.log(data.getMessage())
-          this.setState(data.getMessage())
-        })
-        this.game.on('status', status => {
-          console.log(status.details);
+          console.log(data.array)
+          this.parseStream(data.array)
+          // this.setState(data.getMessage())
         })
         // If user hit start => start game, if join => do nothing
         if (window.started){ 
@@ -90,7 +76,7 @@ class Home extends React.Component {
               );
             } else {
               console.log("Started game");
-              this.depositHandler(100)
+              window.deposit = this.depositHandler
             }
           })
         }
@@ -98,17 +84,34 @@ class Home extends React.Component {
     });
   }
 
+
   parseJoin = response => {
+    const playerList = this.updateScoreboard(response[2]);
+    this.setState({...this.state, playerList: playerList, time: response[3], points: response[4]})
+  }
+  
+
+  updateScoreboard = scores => {
     const playerList = [];
-    response[2].forEach(player => {
-      playerList.push({me: player[0] == this.userId, nickName: player[1], score: player[2]})
-    })
-    playerList.pop(playerList.length)
-    this.setState({...this.state, playerList, time: response[3], points: response[4]})
+    if (!this.players && this.started) {
+      this.players = {}
+      scores.forEach(player => {
+        playerList.push({me: player[0] == this.userId, nickName: player[1], score: player[2]});
+        this.players[player[0]] = player[1]
+      })
+      this.players[this.userId] = "You"
+    }
+    else
+      scores.forEach(player => {
+        playerList.push({me: player[0] == this.userId, nickName: player[1], score: player[2]});
+      })
+    // In case bank is not included in the game, uncomment the next line
+    // playerList.pop(playerList.length)
+    return playerList
   }
 
   depositHandler = amount => {
-    if (!this.gameId) return alert("The game has not started yet")
+    if (!this.started) return alert("The game has not started yet")
     var request = new DepositRequest();
     request.setGameId(this.gameId);
     request.setUserId(this.userId);
@@ -119,10 +122,46 @@ class Home extends React.Component {
           `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
         );
       } else {
-        console.log(response);
+        console.log(response.array);
       }
     });
   }
+
+  creditHandler = amount => {
+    if (!this.started) return alert("The game has not started yet")
+    var request = new CreditRequest();
+    request.setGameId(this.gameId);
+    request.setUserId(this.userId);
+    request.setValue(amount);
+    client.credit(request, {}, (error, response) => {
+      if (error) {
+        console.log(
+          `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
+        );
+      } else {
+        console.log(response.array);
+      }
+    });
+  }
+
+  parseStream = data => {
+    window.dd = data
+    const start = data[2]
+    const scoreboardUpdate = data[4]
+    console.log(data)
+    var playerList
+    var logList = []
+
+    
+    if (!this.started && start) {
+      this.started = true
+      logList.push({event: "The game has started"})
+    }
+    if (scoreboardUpdate && scoreboardUpdate[0]) playerList = this.updateScoreboard(scoreboardUpdate[0])
+    
+    this.setState({ ...this.state, playerList: playerList || this.state.playerList, logList: [...this.state.logList, ...logList] })
+  }
+
 
   render() {
     return (
@@ -140,8 +179,8 @@ class Home extends React.Component {
                 <SimpleCard title="Total Points" description="" value={this.state.points} />
               </div>
               <div className="second-line-cards">
-                <CardWithInput title="Credit" description="Request amount" />
-                <CardWithInput title="Deposit" description="Deposit amount" />
+                <CardWithInput clickEvent={this.creditHandler} title="Credit" description="Request amount" />
+                <CardWithInput clickEvent={this.depositHandler} title="Deposit" description="Deposit amount" />
               </div>
               <div className="third-line-cards">
                 <Lottery
