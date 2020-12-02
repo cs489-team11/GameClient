@@ -48,8 +48,8 @@ class Home extends React.Component {
           `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
         );
       } else {
-        this.userId = /** @type {string} */ response.array[0];
-        this.gameId = /** @type {string} */ response.array[1];
+        this.userId = response.array[0];
+        this.gameId = response.array[1];
         console.log("Joined game");
         this.parseJoin(response.array);
 
@@ -63,7 +63,6 @@ class Home extends React.Component {
           this.parseStream(data.array);
           // this.setState(data.getMessage())
         });
-        // If user hit start => start game, if join => do nothing
       }
     });
   }
@@ -78,7 +77,7 @@ class Home extends React.Component {
         );
       } else {
         console.log("Started game");
-        this.setState({... this.state, started: true})
+        this.setState({... this.state, started: true, logList: [{event: 'The game has started'}]})
       }
     });
   }
@@ -159,11 +158,12 @@ class Home extends React.Component {
     });
   };
 
+  // TODO: edit this function
   parseStream = (data) => {
     window.dd = data;
     const newJoin = data[0];
     const start = data[2];
-    const scoreboardUpdate = data[4];
+    const transactions = data[4];
     var playerList;
     var logList = [];
 
@@ -173,16 +173,28 @@ class Home extends React.Component {
 
     if (start && !this.state.started) {
       this.setState({...this.state, started: true});
-      logList.push({ event: "The game has started" });
+      logList.unshift({ event: "The game has started" });
     }
 
-    if (scoreboardUpdate && scoreboardUpdate[0])
-      playerList = this.updateScoreboard(scoreboardUpdate[0]);
+    if (transactions){
+      const newScores = transactions[0]
+      const creditEvents = transactions[1]
+      const depositEvents = transactions[2]
+      const creditReturnEvents = transactions[3]
+      const depositReturnEvents = transactions[4]
+      const thefts = transactions[5]
+
+      if (newScores) playerList = this.updateScoreboard(newScores);
+      if (creditEvents) logList.unshift({event: `${this.players[creditEvents[0]]} received a credit of ${creditEvents[1]}$`})
+      if (depositEvents) logList.unshift({event: `${this.players[depositEvents[0]]} deposited ${depositEvents[1]}$`})
+
+    }
+      
 
     this.setState({
       ...this.state,
       playerList: playerList || this.state.playerList,
-      logList: [...this.state.logList, ...logList],
+      logList: [...logList,...this.state.logList],
     });
   };
 
