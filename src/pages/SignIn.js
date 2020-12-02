@@ -29,17 +29,6 @@ function SignIn({ logFunc }) {
           >
             ENTER
           </button>
-          <button
-            className="sign-in-button"
-            onClick={() => {
-              logFunc(nickname);
-              window.nickname = nickname;
-              window.started = true;
-              history.push("/");
-            }}
-          >
-            START
-          </button>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ import SimpleCard from "../components/SimpleCard";
 import Timer from "../components/Timer";
 import RiddleCard from "../components/RiddleCard";
 import Lottery from "../components/Lottery";
+import { ThemeConsumer } from "react-bootstrap/esm/ThemeProvider";
 const {
   GameClient,
   StartRequest,
@@ -24,6 +25,7 @@ class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      started: false,
       playerList: [],
       logList: [],
       time: 0,
@@ -62,21 +64,21 @@ class Home extends React.Component {
           // this.setState(data.getMessage())
         });
         // If user hit start => start game, if join => do nothing
-        if (window.started) {
-          var request = new StartRequest();
-          window.req = request;
-          request.setGameId(this.gameId);
-          client.start(request, {}, (error, response) => {
-            if (error) {
-              console.log(
-                `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
-              );
-            } else {
-              console.log("Started game");
-              window.deposit = this.depositHandler;
-            }
-          });
-        }
+      }
+    });
+  }
+
+  start = () => {
+    var request = new StartRequest();
+    request.setGameId(this.gameId);
+    client.start(request, {}, (error, response) => {
+      if (error) {
+        console.log(
+          `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
+        );
+      } else {
+        console.log("Started game");
+        this.setState({... this.state, started: true})
       }
     });
   }
@@ -93,36 +95,38 @@ class Home extends React.Component {
 
   updateScoreboard = (scores) => {
     let playerList = [];
-    if (!this.players && this.started) {
+    if (!this.players && this.state.started) {
       this.players = {};
       scores.forEach((player) => {
-        playerList.push({
-          id: player[0],
-          me: player[0] == this.userId,
-          nickName: player[1],
-          score: player[2],
-        });
-        this.players[player[0]] = player[1];
+        if (player[1] != "bank") {
+          playerList.push({
+            id: player[0],
+            me: player[0] == this.userId,
+            nickName: player[1],
+            score: player[2],
+          });
+          this.players[player[0]] = player[1];
+        }
       });
       playerList = playerList.sort((a, b) => b.score - a.score);
       this.players[this.userId] = "You";
     } else
       scores.forEach((player) => {
-        playerList.push({
-          id: player[0],
-          me: player[0] == this.userId,
-          nickName: player[1],
-          score: player[2],
-        });
+        if (player[1] != "bank") {
+          playerList.push({
+            id: player[0],
+            me: player[0] == this.userId,
+            nickName: player[1],
+            score: player[2],
+          });
+        }
       });
     playerList = playerList.sort((a, b) => b.score - a.score);
-    // In case bank is not included in the game, uncomment the next line
-    // playerList.pop(playerList.length)
     return playerList;
   };
 
   depositHandler = (amount) => {
-    if (!this.started) return alert("The game has not started yet");
+    if (!this.state.started) return alert("The game has not started yet");
     var request = new DepositRequest();
     request.setGameId(this.gameId);
     request.setUserId(this.userId);
@@ -139,7 +143,7 @@ class Home extends React.Component {
   };
 
   creditHandler = (amount) => {
-    if (!this.started) return alert("The game has not started yet");
+    if (!this.state.started) return alert("The game has not started yet");
     var request = new CreditRequest();
     request.setGameId(this.gameId);
     request.setUserId(this.userId);
@@ -157,16 +161,21 @@ class Home extends React.Component {
 
   parseStream = (data) => {
     window.dd = data;
+    const newJoin = data[0];
     const start = data[2];
     const scoreboardUpdate = data[4];
-    console.log(data);
     var playerList;
     var logList = [];
 
-    if (!this.started && start) {
-      this.started = true;
+    if (newJoin) {
+      playerList = [...this.state.playerList, ...this.updateScoreboard(newJoin)]
+    }
+
+    if (start && !this.state.started) {
+      this.setState({...this.state, started: true});
       logList.push({ event: "The game has started" });
     }
+
     if (scoreboardUpdate && scoreboardUpdate[0])
       playerList = this.updateScoreboard(scoreboardUpdate[0]);
 
@@ -185,11 +194,21 @@ class Home extends React.Component {
           <div className="content">
             <div className="cards-section">
               <div className="simple-cards">
-                <SimpleCard
-                  title="Time Left"
-                  description=""
-                  value={<Timer time={this.state.time * 1000} />}
-                />
+                {
+                  this.state.started ? <SimpleCard
+                    title="Time Left"
+                    description=""
+                    value={<Timer time={300000} />}
+                  /> : 
+                  <button
+                    className="sign-in-button"
+                    onClick={() => {
+                      this.start()
+                    }}
+                    >
+                    START
+                  </button>
+                }
                 <SimpleCard
                   title="Total Points"
                   description=""
