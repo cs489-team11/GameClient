@@ -473,6 +473,86 @@ proto.server.GamePromiseClient.prototype.deposit =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.server.LotteryRequest,
+ *   !proto.server.LotteryResponse>}
+ */
+const methodDescriptor_Game_Lottery = new grpc.web.MethodDescriptor(
+  '/server.Game/Lottery',
+  grpc.web.MethodType.UNARY,
+  proto.server.LotteryRequest,
+  proto.server.LotteryResponse,
+  /**
+   * @param {!proto.server.LotteryRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.server.LotteryResponse.deserializeBinary
+);
+
+
+/**
+ * @const
+ * @type {!grpc.web.AbstractClientBase.MethodInfo<
+ *   !proto.server.LotteryRequest,
+ *   !proto.server.LotteryResponse>}
+ */
+const methodInfo_Game_Lottery = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.server.LotteryResponse,
+  /**
+   * @param {!proto.server.LotteryRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.server.LotteryResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.server.LotteryRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.Error, ?proto.server.LotteryResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.server.LotteryResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.server.GameClient.prototype.lottery =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/server.Game/Lottery',
+      request,
+      metadata || {},
+      methodDescriptor_Game_Lottery,
+      callback);
+};
+
+
+/**
+ * @param {!proto.server.LotteryRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.server.LotteryResponse>}
+ *     Promise that resolves to the response
+ */
+proto.server.GamePromiseClient.prototype.lottery =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/server.Game/Lottery',
+      request,
+      metadata || {},
+      methodDescriptor_Game_Lottery);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.server.StreamRequest,
  *   !proto.server.StreamResponse>}
  */
