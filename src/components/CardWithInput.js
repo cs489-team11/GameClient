@@ -20,7 +20,7 @@ function CardWithInput({
       </div>
       <div>
         <input
-          type="text"
+          type="number"
           className="card-input"
           placeholder="enter the amount"
           value={data}
