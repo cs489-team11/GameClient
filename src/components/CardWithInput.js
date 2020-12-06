@@ -1,30 +1,22 @@
 import React from "react";
 
-function CardWithInput({ title, description, value, clickEvent, helpContent }) {
+function CardWithInput({
+  title,
+  description,
+  value,
+  clickEvent,
+  updateModalState,
+}) {
   const [data, setData] = React.useState("");
-  const [isShown, setIsShown] = React.useState(false);
 
   return (
     <div className="simple-card">
       <h2 className="heading-secondary">{title}</h2>
-      <div
-        style={{ display: "flex", justifyContent: "center" }}
-        className="card-with-input"
-      >
+      <div style={{ display: "flex", justifyContent: "center" }}>
         <p className="card-with-input-description">{description}</p>
-        <button
-          className="info-button"
-          onClick={() => {
-            setIsShown(!isShown);
-          }}
-        >
+        <button className="info-button" onClick={updateModalState}>
           i
         </button>
-        {isShown ? (
-          <div className="info-popup">
-            <p>{helpContent}</p>
-          </div>
-        ) : null}
       </div>
       <div>
         <input

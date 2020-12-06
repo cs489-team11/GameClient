@@ -7,6 +7,7 @@ import Timer from "../components/Timer";
 import RiddleCard from "../components/RiddleCard";
 import Lottery from "../components/Lottery";
 import { ThemeConsumer } from "react-bootstrap/esm/ThemeProvider";
+import Modal from "../components/Modal";
 const {
   GameClient,
   StartRequest,
@@ -38,6 +39,11 @@ class Home extends React.Component {
       },
       points: 0,
       prizeList: [],
+      modal: {
+        isShown: false,
+        infoContent:
+          "Enter the amount you want to put in the bank. After k seconds n + x will be added to your score.",
+      },
     };
 
     var request = new JoinRequest();
@@ -66,6 +72,17 @@ class Home extends React.Component {
       }
     });
   }
+  updateModalState = (content) => {
+    this.setState((state) => {
+      return {
+        ...state,
+        modal: {
+          isShown: true,
+          infoContent: content,
+        },
+      };
+    });
+  };
 
   start = () => {
     var request = new StartRequest();
@@ -248,13 +265,21 @@ class Home extends React.Component {
                   clickEvent={this.creditHandler}
                   title="Credit"
                   description="Request amount"
-                  helpContent="Enter the amount you want to take from the bank. After k seconds n + x will be subtracted from your score."
+                  updateModalState={() => {
+                    this.updateModalState(
+                      "Enter the amount you want to take from the bank. After n seconds n + x will be subtracted from your score."
+                    );
+                  }}
                 />
                 <CardWithInput
                   clickEvent={this.depositHandler}
                   title="Deposit"
                   description="Deposit amount"
-                  helpContent="Enter the amount you want to put in the bank. After k seconds n + x will be added to your score."
+                  updateModalState={() => {
+                    this.updateModalState(
+                      "Enter the amount you want to put in the bank. After k seconds n + x will be added to your score."
+                    );
+                  }}
                 />
               </div>
               <div className="third-line-cards">
@@ -262,13 +287,21 @@ class Home extends React.Component {
                   title="Lottery"
                   description="Try your luck"
                   prizeList={this.state.prizeList}
-                  helpContent="If you click on on of the cards, the amount behind it will be added to your score."
+                  updateModalState={() => {
+                    this.updateModalState(
+                      "If you click on on of the cards, the amount behind it will be added to your score."
+                    );
+                  }}
                 />
                 <RiddleCard
                   title="Play with bank"
                   description="What is your bid?"
                   value={this.state.riddle}
-                  helpContent="You will be given gift amount if you pick the correct answer."
+                  updateModalState={() => {
+                    this.updateModalState(
+                      "You will be given gift amount if you pick the correct answer."
+                    );
+                  }}
                 />
               </div>
             </div>
@@ -292,6 +325,22 @@ class Home extends React.Component {
             </div>
           </div>
         </div>
+        {this.state.modal.isShown && (
+          <Modal
+            infoContent={this.state.modal.infoContent}
+            onClose={() => {
+              this.setState((state) => {
+                return {
+                  ...state,
+                  modal: {
+                    isShown: false,
+                    infoContent: "",
+                  },
+                };
+              });
+            }}
+          />
+        )}
       </div>
     );
   }
