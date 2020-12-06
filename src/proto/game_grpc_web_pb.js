@@ -553,6 +553,166 @@ proto.server.GamePromiseClient.prototype.lottery =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.server.GenerateQuestionRequest,
+ *   !proto.server.GenerateQuestionResponse>}
+ */
+const methodDescriptor_Game_GenerateQuestion = new grpc.web.MethodDescriptor(
+  '/server.Game/GenerateQuestion',
+  grpc.web.MethodType.UNARY,
+  proto.server.GenerateQuestionRequest,
+  proto.server.GenerateQuestionResponse,
+  /**
+   * @param {!proto.server.GenerateQuestionRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.server.GenerateQuestionResponse.deserializeBinary
+);
+
+
+/**
+ * @const
+ * @type {!grpc.web.AbstractClientBase.MethodInfo<
+ *   !proto.server.GenerateQuestionRequest,
+ *   !proto.server.GenerateQuestionResponse>}
+ */
+const methodInfo_Game_GenerateQuestion = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.server.GenerateQuestionResponse,
+  /**
+   * @param {!proto.server.GenerateQuestionRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.server.GenerateQuestionResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.server.GenerateQuestionRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.Error, ?proto.server.GenerateQuestionResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.server.GenerateQuestionResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.server.GameClient.prototype.generateQuestion =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/server.Game/GenerateQuestion',
+      request,
+      metadata || {},
+      methodDescriptor_Game_GenerateQuestion,
+      callback);
+};
+
+
+/**
+ * @param {!proto.server.GenerateQuestionRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.server.GenerateQuestionResponse>}
+ *     Promise that resolves to the response
+ */
+proto.server.GamePromiseClient.prototype.generateQuestion =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/server.Game/GenerateQuestion',
+      request,
+      metadata || {},
+      methodDescriptor_Game_GenerateQuestion);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.server.AnswerQuestionRequest,
+ *   !proto.server.AnswerQuestionResponse>}
+ */
+const methodDescriptor_Game_AnswerQuestion = new grpc.web.MethodDescriptor(
+  '/server.Game/AnswerQuestion',
+  grpc.web.MethodType.UNARY,
+  proto.server.AnswerQuestionRequest,
+  proto.server.AnswerQuestionResponse,
+  /**
+   * @param {!proto.server.AnswerQuestionRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.server.AnswerQuestionResponse.deserializeBinary
+);
+
+
+/**
+ * @const
+ * @type {!grpc.web.AbstractClientBase.MethodInfo<
+ *   !proto.server.AnswerQuestionRequest,
+ *   !proto.server.AnswerQuestionResponse>}
+ */
+const methodInfo_Game_AnswerQuestion = new grpc.web.AbstractClientBase.MethodInfo(
+  proto.server.AnswerQuestionResponse,
+  /**
+   * @param {!proto.server.AnswerQuestionRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.server.AnswerQuestionResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.server.AnswerQuestionRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.Error, ?proto.server.AnswerQuestionResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.server.AnswerQuestionResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.server.GameClient.prototype.answerQuestion =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/server.Game/AnswerQuestion',
+      request,
+      metadata || {},
+      methodDescriptor_Game_AnswerQuestion,
+      callback);
+};
+
+
+/**
+ * @param {!proto.server.AnswerQuestionRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.server.AnswerQuestionResponse>}
+ *     Promise that resolves to the response
+ */
+proto.server.GamePromiseClient.prototype.answerQuestion =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/server.Game/AnswerQuestion',
+      request,
+      metadata || {},
+      methodDescriptor_Game_AnswerQuestion);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.server.StreamRequest,
  *   !proto.server.StreamResponse>}
  */
