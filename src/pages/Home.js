@@ -77,10 +77,14 @@ class Home extends React.Component {
         );
       } else {
         console.log("Started game");
-        this.setState({... this.state, started: true, logList: [{event: 'The game has started'}]})
+        this.setState({
+          ...this.state,
+          started: true,
+          logList: [{ event: "The game has started" }],
+        });
       }
     });
-  }
+  };
 
   parseJoin = (response) => {
     const playerList = this.updateScoreboard(response[2]);
@@ -168,33 +172,44 @@ class Home extends React.Component {
     var logList = [];
 
     if (newJoin) {
-      playerList = [...this.state.playerList, ...this.updateScoreboard(newJoin)]
+      playerList = [
+        ...this.state.playerList,
+        ...this.updateScoreboard(newJoin),
+      ];
     }
 
     if (start && !this.state.started) {
-      this.setState({...this.state, started: true});
+      this.setState({ ...this.state, started: true });
       logList.unshift({ event: "The game has started" });
     }
 
-    if (transactions){
-      const newScores = transactions[0]
-      const creditEvents = transactions[1]
-      const depositEvents = transactions[2]
-      const creditReturnEvents = transactions[3]
-      const depositReturnEvents = transactions[4]
-      const thefts = transactions[5]
+    if (transactions) {
+      const newScores = transactions[0];
+      const creditEvents = transactions[1];
+      const depositEvents = transactions[2];
+      const creditReturnEvents = transactions[3];
+      const depositReturnEvents = transactions[4];
+      const thefts = transactions[5];
 
       if (newScores) playerList = this.updateScoreboard(newScores);
-      if (creditEvents) logList.unshift({event: `${this.players[creditEvents[0]]} received a credit of ${creditEvents[1]}$`})
-      if (depositEvents) logList.unshift({event: `${this.players[depositEvents[0]]} deposited ${depositEvents[1]}$`})
-
+      if (creditEvents)
+        logList.unshift({
+          event: `${this.players[creditEvents[0]]} received a credit of ${
+            creditEvents[1]
+          }$`,
+        });
+      if (depositEvents)
+        logList.unshift({
+          event: `${this.players[depositEvents[0]]} deposited ${
+            depositEvents[1]
+          }$`,
+        });
     }
-      
 
     this.setState({
       ...this.state,
       playerList: playerList || this.state.playerList,
-      logList: [...logList,...this.state.logList],
+      logList: [...logList, ...this.state.logList],
     });
   };
 
@@ -206,21 +221,22 @@ class Home extends React.Component {
           <div className="content">
             <div className="cards-section">
               <div className="simple-cards">
-                {
-                  this.state.started ? <SimpleCard
+                {this.state.started ? (
+                  <SimpleCard
                     title="Time Left"
                     description=""
                     value={<Timer time={300000} />}
-                  /> : 
+                  />
+                ) : (
                   <button
                     className="sign-in-button"
                     onClick={() => {
-                      this.start()
+                      this.start();
                     }}
-                    >
+                  >
                     START
                   </button>
-                }
+                )}
                 <SimpleCard
                   title="Total Points"
                   description=""
@@ -232,11 +248,13 @@ class Home extends React.Component {
                   clickEvent={this.creditHandler}
                   title="Credit"
                   description="Request amount"
+                  helpContent="Enter the amount you want to take from the bank. After k seconds n + x will be subtracted from your score."
                 />
                 <CardWithInput
                   clickEvent={this.depositHandler}
                   title="Deposit"
                   description="Deposit amount"
+                  helpContent="Enter the amount you want to put in the bank. After k seconds n + x will be added to your score."
                 />
               </div>
               <div className="third-line-cards">
@@ -244,11 +262,13 @@ class Home extends React.Component {
                   title="Lottery"
                   description="Try your luck"
                   prizeList={this.state.prizeList}
+                  helpContent="If you click on on of the cards, the amount behind it will be added to your score."
                 />
                 <RiddleCard
                   title="Play with bank"
                   description="What is your bid?"
                   value={this.state.riddle}
+                  helpContent="You will be given gift amount if you pick the correct answer."
                 />
               </div>
             </div>

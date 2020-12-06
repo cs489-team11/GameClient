@@ -129,6 +129,25 @@ body {
 .card-with-input-description {
   padding: 10px;
 }
+
+.card-with-input {
+  position: relative;
+}
+
+.info-popup {
+  background-color: #fff;
+  border: 1px solid red;
+  font-size: 15px;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  padding: 10px;
+  position: absolute;
+  top: -100px;
+  /* right: -100px; */
+  width: 250px;
+  height: 100px;
+  left: 250px;
+  z-index: 10;
+}
 .card-input {
   padding: 8px 15px;
   /* display: inline; */
