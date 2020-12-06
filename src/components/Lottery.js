@@ -21,7 +21,7 @@ function Lottery({ title, description, prizeList, updateModalState }) {
       </div>
       <div id="grid">
         {prizeList.map((pair, index) => {
-          return <LotteryGrid pair={pair} />;
+          return <LotteryGrid pair={pair} key={index}/>;
         })}
       </div>
     </div>
