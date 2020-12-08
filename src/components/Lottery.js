@@ -1,7 +1,7 @@
 import React from "react";
 import LotteryGrid from "./LotteryGrid.js";
 
-function Lottery({ title, description, prizeList, updateModalState }) {
+function Lottery({ title, description, prizeList, updateModalState, onClickHandler }) {
   return (
     <div className="simple-card">
       <h2 className="heading-secondary">{title}</h2>
@@ -11,19 +11,13 @@ function Lottery({ title, description, prizeList, updateModalState }) {
           i
         </button>
       </div>
-      <div>
-        <input
-          type="text"
-          className="card-input"
-          placeholder="enter the amount"
-        />
-        <button className="video-game-btn">ENTER</button>
-      </div>
       <div id="grid">
         {prizeList.map((pair, index) => {
-          return <LotteryGrid pair={pair} key={index}/>;
+          return <LotteryGrid onClickHandler={() => onClickHandler(index + 1)} pair={pair} key={index}/>;
         })}
       </div>
+      <br></br>
+      <p>Wait for the cells to become "?" in order to be able to play.</p>
     </div>
   );
 }

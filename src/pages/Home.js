@@ -22,7 +22,8 @@ const {
 } = require("../proto/game_grpc_web_pb");
 
 const client = new GameClient("http://178.128.85.78:8080", null, null);
-
+window.client = client
+window.req = new LotteryRequest()
 // TODO: use credit and deposit as part of onclick method for buttons, passing the value in the forms
 
 class Home extends React.Component {
@@ -31,11 +32,12 @@ class Home extends React.Component {
     this.state = {
       started: false,
       playerList: [],
+      lotteryOnclick: this.lotteryHandler,
       logList: [],
       time: 0,
       riddle: {},
       points: 0,
-      prizeList: [1,2,3,4,5,6,7,8,9],
+      prizeList: ["-", "-", "-", "-", "-", "-", "-", "-", "-"],
       modal: {
         isShown: false,
         infoContent:
@@ -51,6 +53,7 @@ class Home extends React.Component {
           `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
         );
       } else {
+        console.log(response.array)
         this.userId = response.array[0];
         this.gameId = response.array[1];
         console.log("Joined game");
@@ -98,6 +101,15 @@ class Home extends React.Component {
           started: true,
           logList: [{ event: "The game has started" }],
         });
+        const lotteryCooldown = () => {
+          if (timeLeft == -1) {
+            clearTimeout(timerId);
+            this.setState({...this.state, prizeList: [false, false,false,false,false,false,false,false,false]})
+          }
+          else timeLeft --
+        }
+        var timeLeft = 20;
+        var timerId = setInterval(lotteryCooldown, 1000);
       }
     });
   };
@@ -176,6 +188,45 @@ class Home extends React.Component {
     });
   };
   
+  // LOTTERY
+  lotteryHandler = (index) => {
+    if (!this.state.started) return this.updateModalState("The game has not started yet");
+    var request = new LotteryRequest();
+    request.setUserId(this.userId);
+    request.setGameId(this.gameId);
+    console.log(index)
+    request.setCellIndex(index);
+    client.lottery(request, {}, (error, response) => {
+      if (error) {
+        console.log(
+          `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
+        );
+      } else {
+        console.log(response.array);
+        const lotteryCooldown = () => {
+          if (timeLeft == -1) {
+            clearTimeout(timerId);
+            this.setState({...this.state, prizeList: [false, false,false,false,false,false,false,false,false]})
+          }
+          else timeLeft --
+        }
+        if (response.array[2]) {
+          var timeLeft = 20;
+          var timerId = setInterval(lotteryCooldown, 1000);
+          this.setState({...this.state, prizeList: response.array[1]})
+          this.updateModalState(`You got ${response.array[2]}$ from playing the lottery.`)
+        }
+        else {
+          this.setState({...this.state, prizeList: ["-", "-", "-", "-", "-","-","-","-","-"]})
+          var timeLeft = 20;
+          var timerId = setInterval(lotteryCooldown, 1000);
+          this.updateModalState("It is not time of the lottery yet. Please be patient")
+        }
+      }
+    })
+  }
+
+
   // CREDIT
   creditHandler = (amount) => {
     if (!this.state.started) return this.updateModalState("The game has not started yet");
@@ -253,6 +304,15 @@ class Home extends React.Component {
 
     if (start && !this.state.started) {
       this.endTime = new Date().getTime() + 300000
+      const lotteryCooldown = () => {
+        if (timeLeft == -1) {
+          clearTimeout(timerId);
+          this.setState({...this.state, prizeList: [false, false,false,false,false,false,false,false,false]})
+        }
+        else timeLeft --
+      }
+      var timeLeft = 20;
+      var timerId = setInterval(lotteryCooldown, 1000);
       this.setState({ ...this.state, started: true });
       logList.unshift({ event: "The game has started" });
     }
@@ -375,9 +435,10 @@ class Home extends React.Component {
                   title="Lottery"
                   description="Try your luck"
                   prizeList={this.state.prizeList}
+                  onClickHandler={this.lotteryHandler}
                   updateModalState={() => {
                     this.updateModalState(
-                      "If you click on on of the cards, the amount behind it will be added to your score."
+                      "If you click on on of the cards, the amount behind it will be added to your score. Wait for the cells to become \"?\" in order to be able to play."
                     );
                   }}
                 />
