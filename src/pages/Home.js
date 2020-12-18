@@ -18,12 +18,11 @@ const {
   StreamRequest,
   GenerateQuestionRequest,
   AnswerQuestionRequest,
-  LotteryRequest
+  LotteryRequest,
 } = require("../proto/game_grpc_web_pb");
 
 const client = new GameClient("http://178.128.85.78:8080", null, null);
-window.client = client
-window.req = new LotteryRequest()
+
 // TODO: use credit and deposit as part of onclick method for buttons, passing the value in the forms
 
 class Home extends React.Component {
@@ -53,7 +52,6 @@ class Home extends React.Component {
           `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
         );
       } else {
-        console.log(response.array)
         this.userId = response.array[0];
         this.gameId = response.array[1];
         console.log("Joined game");
@@ -83,8 +81,8 @@ class Home extends React.Component {
       };
     });
   };
-  
-// GAME START
+
+  // GAME START
   start = () => {
     var request = new StartRequest();
     request.setGameId(this.gameId);
@@ -94,7 +92,7 @@ class Home extends React.Component {
           `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
         );
       } else {
-        this.endTime = new Date().getTime() + 300000
+        this.endTime = new Date().getTime() + this.duration * 1000;
         console.log("Started game");
         this.setState({
           ...this.state,
@@ -104,11 +102,23 @@ class Home extends React.Component {
         const lotteryCooldown = () => {
           if (timeLeft == -1) {
             clearTimeout(timerId);
-            this.setState({...this.state, prizeList: [false, false,false,false,false,false,false,false,false]})
-          }
-          else timeLeft --
-        }
-        var timeLeft = 20;
+            this.setState({
+              ...this.state,
+              prizeList: [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+              ],
+            });
+          } else timeLeft--;
+        };
+        var timeLeft = this.lotteryTime;
         var timerId = setInterval(lotteryCooldown, 1000);
       }
     });
@@ -117,6 +127,8 @@ class Home extends React.Component {
   // AFTER JOINING
   parseJoin = (response) => {
     const playerList = this.updateScoreboard(response[2]);
+    this.duration = response[3];
+    this.lotteryTime = response[12] - 2;
     this.setState({
       ...this.state,
       playerList: playerList,
@@ -135,7 +147,7 @@ class Home extends React.Component {
           me = false;
           if (player[0] == this.userId) {
             me = true;
-            this.setState({...this.state, points: player[2] || 0})
+            this.setState({ ...this.state, points: player[2] || 0 });
           }
           playerList.push({
             id: player[0],
@@ -154,7 +166,7 @@ class Home extends React.Component {
           me = false;
           if (player[0] == this.userId) {
             me = true;
-            this.setState({...this.state, points: player[2] || 0})
+            this.setState({ ...this.state, points: player[2] || 0 });
           }
           playerList.push({
             id: player[0],
@@ -172,7 +184,12 @@ class Home extends React.Component {
 
   // DEPOSIT
   depositHandler = (amount) => {
-    if (!this.state.started) return this.updateModalState("The game has not started yet");
+    if (!this.state.started)
+      return this.updateModalState("The game has not started yet");
+    if (amount <= 0)
+      return this.updateModalState("Please enter a positive number");
+    if (amount > 2147483647 || amount > this.state.points)
+      return this.updateModalState("Maximum possible amount is your score");
     var request = new DepositRequest();
     request.setGameId(this.gameId);
     request.setUserId(this.userId);
@@ -183,18 +200,20 @@ class Home extends React.Component {
           `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
         );
       } else {
-        if (response.array[0]) this.updateModalState(`You have deposited ${amount}$`)
+        if (response.array[0]) {
+          this.updateModalState(`You have deposited ${amount}$`);
+        }
       }
     });
   };
-  
+
   // LOTTERY
   lotteryHandler = (index) => {
-    if (!this.state.started) return this.updateModalState("The game has not started yet");
+    if (!this.state.started)
+      return this.updateModalState("The game has not started yet");
     var request = new LotteryRequest();
     request.setUserId(this.userId);
     request.setGameId(this.gameId);
-    console.log(index)
     request.setCellIndex(index);
     client.lottery(request, {}, (error, response) => {
       if (error) {
@@ -202,34 +221,49 @@ class Home extends React.Component {
           `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
         );
       } else {
-        console.log(response.array);
         const lotteryCooldown = () => {
           if (timeLeft == -1) {
             clearTimeout(timerId);
-            this.setState({...this.state, prizeList: [false, false,false,false,false,false,false,false,false]})
-          }
-          else timeLeft --
-        }
-        if (response.array[2]) {
-          var timeLeft = 20;
+            this.setState({
+              ...this.state,
+              prizeList: [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+              ],
+            });
+          } else timeLeft--;
+        };
+        if (response.array[0] == true) {
+          var timeLeft = this.lotteryTime;
+          var amount = response.array[2];
+          if (!response.array[2]) amount = 0;
           var timerId = setInterval(lotteryCooldown, 1000);
-          this.setState({...this.state, prizeList: response.array[1]})
-          this.updateModalState(`You got ${response.array[2]}$ from playing the lottery.`)
-        }
-        else {
-          this.setState({...this.state, prizeList: ["-", "-", "-", "-", "-","-","-","-","-"]})
-          var timeLeft = 20;
-          var timerId = setInterval(lotteryCooldown, 1000);
-          this.updateModalState("It is not time of the lottery yet. Please be patient")
+          this.setState({ ...this.state, prizeList: response.array[1] });
+          this.updateModalState(`You got ${amount}$ from playing the lottery.`);
+        } else {
+          this.updateModalState(
+            "It is not time of the lottery yet. Please be patient"
+          );
         }
       }
-    })
-  }
-
+    });
+  };
 
   // CREDIT
   creditHandler = (amount) => {
-    if (!this.state.started) return this.updateModalState("The game has not started yet");
+    if (!this.state.started)
+      return this.updateModalState("The game has not started yet");
+    if (amount <= 0)
+      return this.updateModalState("Please enter a positive number");
+    if (amount > 2147483647)
+      return this.updateModalState("Maximum possible amount is 2147483647");
     var request = new CreditRequest();
     request.setGameId(this.gameId);
     request.setUserId(this.userId);
@@ -240,59 +274,85 @@ class Home extends React.Component {
           `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
         );
       } else {
-        if (response.array[0]) this.updateModalState(`You took a credit of ${amount}$`)
-        else this.updateModalState(response.array[1])
+        if (response.array[0])
+          this.updateModalState(`You took a credit of ${amount}$`);
+        else this.updateModalState(response.array[1]);
       }
     });
   };
 
-  // QUESTION 
+  // QUESTION
   questionHandler = (amount) => {
-    if (!this.state.started) return this.updateModalState("The game has not started yet");
+    if (!this.state.started)
+      return this.updateModalState("The game has not started yet");
+    if (amount <= 0)
+      return this.updateModalState("Please enter a positive number");
+    if (amount > 2147483647 || amount > this.state.points)
+      return this.updateModalState("You can't bid more than you have!");
     var request = new GenerateQuestionRequest();
-    request.setBidPoints(amount)
-    request.setUserId(this.userId)
-    request.setGameId(this.gameId)
+    request.setBidPoints(amount);
+    request.setUserId(this.userId);
+    request.setGameId(this.gameId);
     client.generateQuestion(request, {}, (error, questions) => {
       if (error) {
         console.log(
           `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
         );
         if (error.code == 3)
-          this.updateModalState("You can't bid more than you have!")
+          this.updateModalState("You can't bid more than you have!");
       } else {
-        this.setState({...this.state, riddle: {
-          question: questions.array[1],
-          variantA: questions.array[2][0],
-          variantB: questions.array[2][1],
-          variantC: questions.array[2][2],
-          variantD: questions.array[2][3],
-          onResponse: responseId => {
-            var request = new AnswerQuestionRequest();
-            request.setQuestionId(questions.array[0])
-            request.setGameId(this.gameId)
-            request.setAnswer(responseId)
-            request.setUserId(this.userId)
-            client.answerQuestion(request, {}, (error, response) => {
-              if (error) console.log(`An error with code: "${error.code}" and message: "${error.message}" ocurred. `);
-              else {
-                if (response.array[0]) this.setState({...this.state, riddle: {question: `Correct! You won ${response.array[2]}$.`}})
-                else this.setState({...this.state, riddle: {question: `Wrong! The correct answer was "${questions.array[2][[response.array[1]-1]]}".`}})
-              }
-            })
-          }
-        },})
+        this.setState({
+          ...this.state,
+          riddle: {
+            question: questions.array[1],
+            variantA: questions.array[2][0],
+            variantB: questions.array[2][1],
+            variantC: questions.array[2][2],
+            variantD: questions.array[2][3],
+            onResponse: (responseId) => {
+              var request = new AnswerQuestionRequest();
+              request.setQuestionId(questions.array[0]);
+              request.setGameId(this.gameId);
+              request.setAnswer(responseId);
+              request.setUserId(this.userId);
+              client.answerQuestion(request, {}, (error, response) => {
+                if (error)
+                  console.log(
+                    `An error with code: "${error.code}" and message: "${error.message}" ocurred. `
+                  );
+                else {
+                  if (response.array[0])
+                    this.setState({
+                      ...this.state,
+                      riddle: {
+                        question: `Correct! You won ${response.array[2]}$.`,
+                      },
+                    });
+                  else
+                    this.setState({
+                      ...this.state,
+                      riddle: {
+                        question: `Wrong! The correct answer was "${
+                          questions.array[2][[response.array[1] - 1]]
+                        }".`,
+                      },
+                    });
+                }
+              });
+            },
+          },
+        });
       }
-    })
-  }
+    });
+  };
 
   // MANAGE THE WHOLE GAME SCREEN
   parseStream = (data) => {
-    window.dd = data;
+    console.log(data);
     const newJoin = data[0];
     const start = data[2];
     const transactions = data[4];
-    var playerList = this.state.playerList
+    var playerList = this.state.playerList;
     var logList = [];
 
     if (newJoin) {
@@ -303,15 +363,27 @@ class Home extends React.Component {
     }
 
     if (start && !this.state.started) {
-      this.endTime = new Date().getTime() + 300000
+      this.endTime = new Date().getTime() + this.duration * 1000;
       const lotteryCooldown = () => {
         if (timeLeft == -1) {
           clearTimeout(timerId);
-          this.setState({...this.state, prizeList: [false, false,false,false,false,false,false,false,false]})
-        }
-        else timeLeft --
-      }
-      var timeLeft = 20;
+          this.setState({
+            ...this.state,
+            prizeList: [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+            ],
+          });
+        } else timeLeft--;
+      };
+      var timeLeft = this.lotteryTime;
       var timerId = setInterval(lotteryCooldown, 1000);
       this.setState({ ...this.state, started: true });
       logList.unshift({ event: "The game has started" });
@@ -324,9 +396,9 @@ class Home extends React.Component {
       const creditReturnEvents = transactions[3];
       const depositReturnEvents = transactions[4];
       const thefts = transactions[5];
-      const question = transactions[7]
+      const question = transactions[7];
       if (newScores) playerList = this.updateScoreboard(newScores);
-      
+
       if (creditEvents)
         logList.unshift({
           event: `${this.players[creditEvents[0]]} received a credit of ${
@@ -347,33 +419,37 @@ class Home extends React.Component {
         });
       if (depositReturnEvents)
         logList.unshift({
-          event: `${this.players[depositReturnEvents[0]]} got a deposit return of ${
-            depositReturnEvents[1]
-          }$`,
+          event: `${
+            this.players[depositReturnEvents[0]]
+          } got a deposit return of ${depositReturnEvents[1]}$`,
         });
 
-      if (thefts )
-        {
-        thefts[0].forEach(theft => {
+      if (thefts) {
+        thefts[0].forEach((theft) => {
           if (theft[0] == this.userId) {
-            this.updateModalState(`Thief stole ${theft[1]}$ from You`)
+            this.updateModalState(`Thief stole ${theft[1]}$ from You`);
           }
-        })
+        });
       }
-      if (question){
+      if (question) {
         let eventToAdd;
-        console.log(question)
-        if (question[3])  eventToAdd = `${this.players[question[0]]} won ${question[3]}$ playing with the bank`
-        else eventToAdd = `${this.players[question[0]]} lost ${question[2]}$ playing with the bank`
+        if (question[3])
+          eventToAdd = `${this.players[question[0]]} won ${
+            question[3]
+          }$ playing with the bank`;
+        else
+          eventToAdd = `${this.players[question[0]]} lost ${
+            question[2]
+          }$ playing with the bank`;
         logList.unshift({
-          event: eventToAdd
+          event: eventToAdd,
         });
       }
     }
 
     this.setState({
       ...this.state,
-      playerList: playerList ,
+      playerList: playerList,
       logList: [...logList, ...this.state.logList],
     });
   };
@@ -438,7 +514,7 @@ class Home extends React.Component {
                   onClickHandler={this.lotteryHandler}
                   updateModalState={() => {
                     this.updateModalState(
-                      "If you click on on of the cards, the amount behind it will be added to your score. Wait for the cells to become \"?\" in order to be able to play."
+                      'If you click on on of the cards, the amount behind it will be added to your score. Wait for the cells to become "?" in order to be able to play.'
                     );
                   }}
                 />

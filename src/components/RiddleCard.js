@@ -15,6 +15,7 @@ function RiddleCard({ title, description, value, updateModalState, clickEvent })
       </div>
       <div>
         <input
+          max={2147483647}
           type="number"
           value={data}
           onChange={(event) => setData(event.target.value)}

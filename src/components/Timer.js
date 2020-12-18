@@ -3,7 +3,13 @@ import ReactDOM from "react-dom";
 import Countdown from "react-countdown";
 
 const Completionist = () => (
-  <span>Game is finished. Click for explanation.</span>
+  <span>
+    Game is finished. Click{" "}
+    <a target="_blank" href="https://cs489-team11.github.io/">
+      here
+    </a>{" "}
+    for the explanation.
+  </span>
 );
 
 

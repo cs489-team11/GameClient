@@ -20,6 +20,7 @@ function CardWithInput({
       </div>
       <div>
         <input
+          max={2147483647}
           type="number"
           className="card-input"
           placeholder="enter the amount"
